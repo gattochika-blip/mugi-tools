@@ -1,0 +1,454 @@
+<!--
+  衣かけ工房 — アイデアを、干して、仕上げる工房
+  思いつき → Claudeでストーリー化 → コピー
+-->
+<div id="kinukake-root">
+  <style>
+    #kinukake-root {
+      --ai-ai: #2b3a5b;        /* 藍 */
+      --ai-fuka: #1a2438;      /* 深藍 */
+      --nezu: #6b7280;         /* 鼠 */
+      --usu: #f3efe6;          /* 生成り（薄口） */
+      --washi: #faf7f0;        /* 和紙 */
+      --sumi: #22242a;         /* 墨 */
+      --usuzumi: #4a4d57;      /* 薄墨 */
+      --beni: #b45c4a;         /* 弁柄（差し色） */
+      --kincha: #c9a15a;       /* 金茶 */
+      --sen: #e0d8c6;          /* 罫線 */
+      --shadow: 0 1px 2px rgba(34,36,42,.04), 0 8px 30px rgba(34,36,42,.06);
+
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 18px 80px;
+      color: var(--sumi);
+      font-family: -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.8;
+    }
+    #kinukake-root * { box-sizing: border-box; }
+
+    /* ── 見出し ── */
+    .kk-head {
+      padding: 40px 0 18px;
+      border-bottom: 1px solid var(--sen);
+      margin-bottom: 8px;
+    }
+    .kk-eyebrow {
+      font-size: 11px;
+      letter-spacing: .32em;
+      color: var(--nezu);
+      margin: 0 0 10px;
+      font-weight: 600;
+    }
+    .kk-title {
+      font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+      font-size: 34px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      margin: 0;
+      color: var(--ai-fuka);
+      line-height: 1.25;
+    }
+    .kk-title .kk-dot { color: var(--beni); }
+    .kk-sub {
+      font-size: 13px;
+      color: var(--usuzumi);
+      margin: 12px 0 0;
+      letter-spacing: .02em;
+    }
+
+    /* ── 干し紐（工房の意匠）── */
+    .kk-line {
+      position: relative;
+      height: 26px;
+      margin: 4px 0 22px;
+    }
+    .kk-line::before {
+      content: "";
+      position: absolute;
+      top: 13px; left: 0; right: 0;
+      height: 1px;
+      background: repeating-linear-gradient(90deg, var(--kincha) 0 6px, transparent 6px 12px);
+      opacity: .5;
+    }
+    .kk-peg {
+      position: absolute; top: 7px;
+      width: 3px; height: 13px;
+      background: var(--ai-ai);
+      border-radius: 1px;
+      opacity: .55;
+    }
+
+    /* ── カード ── */
+    .kk-card {
+      background: var(--washi);
+      border: 1px solid var(--sen);
+      border-radius: 10px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .kk-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: var(--ai-fuka);
+      margin: 0 0 8px;
+    }
+    .kk-hint { font-size: 11.5px; color: var(--nezu); font-weight: 400; letter-spacing: .01em; }
+
+    textarea, input[type="text"], input[type="password"] {
+      width: 100%;
+      border: 1px solid var(--sen);
+      border-radius: 8px;
+      padding: 12px 13px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--sumi);
+      background: #fff;
+      resize: vertical;
+      line-height: 1.7;
+    }
+    textarea:focus, input:focus {
+      outline: none;
+      border-color: var(--ai-ai);
+      box-shadow: 0 0 0 3px rgba(43,58,91,.10);
+    }
+    textarea { min-height: 96px; }
+
+    /* ── トーン選択 ── */
+    .kk-tones { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .kk-tone {
+      flex: 1 1 auto;
+      min-width: 90px;
+      padding: 9px 8px;
+      border: 1px solid var(--sen);
+      border-radius: 8px;
+      background: #fff;
+      font-size: 13px;
+      color: var(--usuzumi);
+      cursor: pointer;
+      text-align: center;
+      transition: all .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .kk-tone[aria-pressed="true"] {
+      border-color: var(--ai-ai);
+      background: var(--ai-ai);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* ── ボタン ── */
+    .kk-btn {
+      width: 100%;
+      border: none;
+      border-radius: 9px;
+      padding: 15px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .kk-btn-primary { background: var(--ai-fuka); color: #fff; }
+    .kk-btn-primary:active { transform: translateY(1px); }
+    .kk-btn-primary:disabled { background: var(--nezu); cursor: not-allowed; opacity: .6; }
+
+    /* ── 出力 ── */
+    .kk-out {
+      background: var(--washi);
+      border: 1px solid var(--sen);
+      border-left: 3px solid var(--beni);
+      border-radius: 10px;
+      padding: 22px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    .kk-out-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px; color: var(--nezu); letter-spacing: .08em;
+      margin-bottom: 12px; padding-bottom: 10px;
+      border-bottom: 1px dashed var(--sen);
+    }
+    .kk-out-body {
+      font-size: 15.5px; line-height: 1.95; color: var(--sumi);
+      white-space: pre-wrap; word-break: break-word;
+    }
+
+    .kk-note {
+      font-size: 12px; color: var(--nezu);
+      background: var(--usu); border-radius: 8px;
+      padding: 10px 12px; margin-top: 10px;
+      display: flex; align-items: flex-start; gap: 7px;
+    }
+
+    /* ── 状態表示 ── */
+    .kk-status {
+      font-size: 13px; text-align: center; padding: 10px;
+      border-radius: 8px; margin-bottom: 14px; letter-spacing: .02em;
+    }
+    .kk-status.ok  { background: #eaf2ea; color: #3a6b46; }
+    .kk-status.err { background: #f6e9e6; color: #a3402f; }
+    .kk-status.work{ background: var(--usu); color: var(--usuzumi); }
+
+    .kk-hidden { display: none !important; }
+
+    /* ── 設定リンク ── */
+    .kk-settings-toggle {
+      background: none; border: none; cursor: pointer;
+      font-size: 12px; color: var(--nezu); letter-spacing: .06em;
+      padding: 6px 0; font-family: inherit; text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* spinner */
+    .kk-spin {
+      display: inline-block; width: 13px; height: 13px;
+      border: 2px solid var(--sen); border-top-color: var(--ai-ai);
+      border-radius: 50%; animation: kk-rot .7s linear infinite;
+      vertical-align: -2px; margin-right: 7px;
+    }
+    @keyframes kk-rot { to { transform: rotate(360deg); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .kk-spin { animation: none; }
+      .kk-btn-primary:active { transform: none; }
+    }
+    @media (max-width: 480px) {
+      .kk-title { font-size: 27px; }
+      .kk-card, .kk-out { padding: 18px; }
+    }
+  </style>
+
+  <!-- ── ヘッダ ── -->
+  <header class="kk-head">
+    <p class="kk-eyebrow">KINUKAKE KOBO</p>
+    <h1 class="kk-title">衣かけ工房<span class="kk-dot">.</span></h1>
+    <p class="kk-sub">思いつきを一枚の布のように、干して、仕上げる。<br>アイデア → 物語 → コピーして、Xへ。</p>
+  </header>
+
+  <div class="kk-line" aria-hidden="true">
+    <span class="kk-peg" style="left:12%"></span>
+    <span class="kk-peg" style="left:38%"></span>
+    <span class="kk-peg" style="left:64%"></span>
+    <span class="kk-peg" style="left:88%"></span>
+  </div>
+
+  <!-- ── 設定（初回のみ開く） ── -->
+  <div class="kk-card" id="kk-settings">
+    <span class="kk-label">工房の道具立て <span class="kk-hint">— 一度入れれば、この端末に覚えます</span></span>
+    <div>
+      <label class="kk-label" style="font-size:11.5px">Anthropic API キー</label>
+      <input type="password" id="kk-apikey" placeholder="sk-ant-..." autocomplete="off">
+    </div>
+    <button class="kk-btn kk-btn-primary" id="kk-save-settings" style="margin-top:14px">この端末に覚える</button>
+    <div class="kk-note">
+      <span>🔒</span>
+      <span>鍵は千佳さんのこの端末の中だけに保存され、Anthropic のAPIへ直接届きます。工房の外へは出ません。</span>
+    </div>
+  </div>
+
+  <!-- ── 入力 ── -->
+  <div class="kk-card kk-hidden" id="kk-compose">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span class="kk-label" style="margin:0">きょうの思いつき</span>
+      <button class="kk-settings-toggle" id="kk-open-settings">鍵を入れ直す</button>
+    </div>
+    <textarea id="kk-idea" placeholder="例：米国株も見たいけど、日本人だから日本株かな…。中長期の日本株投資家で有名な5人を、投資スタイルつきで知りたい"></textarea>
+
+    <span class="kk-label" style="margin:16px 0 0">どんな声で仕上げる？</span>
+    <div class="kk-tones" id="kk-tones">
+      <button class="kk-tone" data-tone="chika" aria-pressed="true">千佳さんの声</button>
+      <button class="kk-tone" data-tone="mugi" aria-pressed="false">むぎの声</button>
+      <button class="kk-tone" data-tone="azusa" aria-pressed="false">あずさの声</button>
+    </div>
+
+    <div style="margin-top:18px">
+      <button class="kk-btn kk-btn-primary" id="kk-run">布を干す（物語にする）</button>
+    </div>
+  </div>
+
+  <!-- ── 状態 ── -->
+  <div id="kk-status-slot"></div>
+
+  <!-- ── 出力 ── -->
+  <div id="kk-output-slot"></div>
+
+  <script>
+  (function () {
+    const $ = (id) => document.getElementById(id);
+
+    const store = {
+      get(k){ try { return window.localStorage.getItem(k); } catch(e){ return this._mem[k] ?? null; } },
+      set(k,v){ try { window.localStorage.setItem(k,v); } catch(e){ this._mem[k]=v; } },
+      _mem: {}
+    };
+
+    let toneSel = 'chika';
+
+    const TONE = {
+      chika: {
+        who: 'あなたは「主婦がAIとPythonでSNS自動化に挑む」実録を書いている千佳さん本人。等身大で、無理に専門家ぶらない。読者は同じ主婦・副業に興味がある人。',
+        voice: '一人称は「私」。素直で、正直で、少し照れくさそう。背伸びしない言葉。'
+      },
+      mugi: {
+        who: 'あなたは猫キャラ「むぎ」。こち亀の両さん型、べらんめえ口調、庶民の味方。割安小型株が好き。',
+        voice: '一人称は「オレ」。威勢がよく、ざっくばらんで、下町の親しみ。難しい話も噛み砕く。'
+      },
+      azusa: {
+        who: 'あなたは猫キャラ「あずさ」。穏やかで断定的、標準語に信州の言葉（ずく・えらい）をひとさじ。日常で良いと感じたサービスに投資する派。',
+        voice: '一人称は「わたし」。落ち着いていて芯がある。むぎとの対比で効く静けさ。'
+      }
+    };
+
+    function buildSystem(tone){
+      const t = TONE[tone];
+      return [
+        t.who,
+        '声のトーン：' + t.voice,
+        '',
+        'あなたはクレイトン・メイクピースのセールスライティングの原理を体に入れている。次の順で、SNS投稿（X向け・日本語）を一本書く。',
+        '',
+        '1. つかみ：読者が「いま頭の中で考えていること」から始める。最初の一行で「これ、私のことだ」と感じさせる。恐れ・欲・希望・引け目など、素直な感情に触れる。',
+        '2. 物語：主張を直接ぶつけない。小さな変化のドラマ（つまずき→気づき→やってみた）を、体験として見せる。',
+        '3. 具体と数字：「たくさん」ではなく具体的な数字・固有名詞で解像度を上げる。ただし事実を捏造しない。数字が分からない時は無理に作らず、具体的な情景で代替する。',
+        '4. ベネフィット：機能ではなく「それで毎日がどう変わるか」を生活の場面で描く。読者が「私でもできそう、やってみたい、いい未来がありそう」と感じられるように。',
+        '5. CTA：最後に、そっと背中を押す一言。押し売りにしない。',
+        '',
+        '制約：',
+        '・実在の投資家名や個人名は本文に出さない。',
+        '・投資は断定・推奨をしない。「私はこう思う/こう試した」の範囲に留める。',
+        '・全体で280〜420字程度。改行を使い、スマホで読みやすく。',
+        '・絵文字は使っても1〜2個まで。多用しない。',
+        '・ハッシュタグは付けない（後で人が付ける）。',
+        '・説明や前置きは書かず、投稿本文だけを返す。'
+      ].join('\n');
+    }
+
+    $('kk-tones').addEventListener('click', (e) => {
+      const b = e.target.closest('.kk-tone');
+      if (!b) return;
+      [...$('kk-tones').children].forEach(x => x.setAttribute('aria-pressed', 'false'));
+      b.setAttribute('aria-pressed', 'true');
+      toneSel = b.dataset.tone;
+    });
+
+    function showCompose(){
+      $('kk-settings').classList.add('kk-hidden');
+      $('kk-compose').classList.remove('kk-hidden');
+    }
+    function showSettings(){
+      $('kk-settings').classList.remove('kk-hidden');
+      $('kk-compose').classList.add('kk-hidden');
+      $('kk-apikey').value = store.get('kk_apikey') || '';
+    }
+
+    $('kk-save-settings').addEventListener('click', () => {
+      const key = $('kk-apikey').value.trim();
+      if (!key) { setStatus('err', 'API キーを入れてください。'); return; }
+      store.set('kk_apikey', key);
+      clearStatus();
+      showCompose();
+    });
+
+    $('kk-open-settings').addEventListener('click', showSettings);
+
+    function setStatus(kind, html){
+      $('kk-status-slot').innerHTML =
+        '<div class="kk-status ' + kind + '">' + html + '</div>';
+    }
+    function clearStatus(){ $('kk-status-slot').innerHTML = ''; }
+
+    async function generate(idea, tone){
+      const key = store.get('kk_apikey');
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1200,
+          system: buildSystem(tone),
+          messages: [{ role: 'user', content: '思いつき：\n' + idea }]
+        })
+      });
+      if (!res.ok) {
+        let msg = 'APIエラー（' + res.status + '）';
+        try { const j = await res.json(); if (j.error && j.error.message) msg += '：' + j.error.message; } catch(e){}
+        throw new Error(msg);
+      }
+      const data = await res.json();
+      return (data.content || [])
+        .filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+    }
+
+    $('kk-run').addEventListener('click', async () => {
+      const idea = $('kk-idea').value.trim();
+      if (!idea) { setStatus('err', '思いつきを書いてください。'); return; }
+      $('kk-run').disabled = true;
+      $('kk-run').innerHTML = '<span class="kk-spin"></span>干しています…';
+      setStatus('work', '布を広げて、物語に仕立てています…');
+      $('kk-output-slot').innerHTML = '';
+      try {
+        const text = await generate(idea, toneSel);
+        clearStatus();
+        renderOutput(text);
+      } catch (err) {
+        setStatus('err', err.message || '仕上げに失敗しました。');
+      } finally {
+        $('kk-run').disabled = false;
+        $('kk-run').textContent = '布を干す（物語にする）';
+      }
+    });
+
+    const toneName = { chika:'千佳さんの声', mugi:'むぎの声', azusa:'あずさの声' };
+    function renderOutput(text){
+      const slot = $('kk-output-slot');
+      slot.innerHTML = '';
+      const box = document.createElement('div');
+      box.className = 'kk-out';
+      box.innerHTML =
+        '<div class="kk-out-meta"><span>仕上がり · ' + toneName[toneSel] + '</span><span id="kk-count">' + text.length + '字</span></div>' +
+        '<div class="kk-out-body"></div>';
+      box.querySelector('.kk-out-body').textContent = text;
+      slot.appendChild(box);
+
+      const editWrap = document.createElement('div');
+      editWrap.className = 'kk-card';
+      editWrap.innerHTML =
+        '<span class="kk-label">手直し <span class="kk-hint">— 気になるところは直してからコピーできます</span></span>' +
+        '<textarea id="kk-edit" style="min-height:170px"></textarea>' +
+        '<button class="kk-btn kk-btn-primary" id="kk-copy" style="margin-top:14px">コピーする</button>' +
+        '<div class="kk-note"><span>🧺</span><span>コピーしたら、Xの投稿画面に貼り付けて完成です。</span></div>';
+      slot.appendChild(editWrap);
+      $('kk-edit').value = text;
+
+      $('kk-edit').addEventListener('input', () => {
+        const c = $('kk-count'); if (c) c.textContent = $('kk-edit').value.length + '字';
+      });
+
+      $('kk-copy').addEventListener('click', async () => {
+        const t = $('kk-edit').value;
+        try {
+          await navigator.clipboard.writeText(t);
+          setStatus('ok', 'コピーしました。Xに貼り付けられます。');
+        } catch(e) {
+          $('kk-edit').focus();
+          $('kk-edit').select();
+          setStatus('err', '自動コピーできませんでした。選択されているので、長押し→コピーしてください。');
+        }
+      });
+    }
+
+    if (store.get('kk_apikey')) { showCompose(); } else { showSettings(); }
+  })();
+  </script>
+</div>
